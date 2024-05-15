@@ -17,6 +17,7 @@ for pokemon in pokemon_list:
         for stat in pokemon_data['stats']:
             print(f"{stat['stat']['name'].capitalize()}: {stat['base_stat']}")
         break
+
 else:
     print("Pokémon not found:", pokemon_name.capitalize())
 
@@ -27,6 +28,7 @@ print("Name:", pokemon_computer_data['name'].capitalize())
 print("Stats:")
 for stat in pokemon_computer_data['stats']:
     print(f"{stat['stat']['name'].capitalize()}: {stat['base_stat']}")
+
 
 
 
