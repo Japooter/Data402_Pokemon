@@ -7,13 +7,13 @@ response = requests.get(url)
 pokemon_list = response.json()['results']
 
 
-def get_pokemon_info(pokemon_name):
+def get_pokemon_info(pokemon_name): # get full stats for pokemon in fight
     url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}'
     response = requests.get(url)
 
     if response.status_code == 200:
         pokemon_data = response.json()
-
+        print("Full Stats")
         print(f"Name: {pokemon_data['name'].capitalize()}")
         print(f"ID: {pokemon_data['id']}")
         print(f"Height: {pokemon_data['height']}")
@@ -38,7 +38,7 @@ def get_pokemon_info(pokemon_name):
     else:
         print("Pokemon not found.")
 
-def is_valid_pokemon(pokemon_name):
+def is_valid_pokemon(pokemon_name): # check that user input is an actual pokemon in the list
     return any(pokemon_name.lower() == pokemon['name'] for pokemon in pokemon_list)
 
 while True:
@@ -51,10 +51,10 @@ while True:
 
     player2_name = random.choice(pokemon_list)['name']
 
-    player1_stats = {}
+    player1_stats = {} # empty dictionary for pokemon stats
     player2_stats = {}
 
-    for pokemon in pokemon_list:
+    for pokemon in pokemon_list: # fill up empty dictionary with selected pokemon's stats
         if pokemon['name'] == player1_name.lower():
             player1_url = pokemon['url']
             player1_data = requests.get(player1_url).json()
@@ -90,16 +90,16 @@ while True:
     else:
         print("Player 2's Pokémon not found:", player2_name.capitalize())
 
-    player1_hp = player1_stats.get('hp', 0)
+    player1_hp = player1_stats.get('hp', 0) #health points
     player2_hp = player2_stats.get('hp', 0)
 
-    choice = input("Do you want to view stats of your Pokémon? (yes/no): ").lower()
+    choice = input("Do you want to view the full stats of your Pokémon? (yes/no): ").lower() # view full stats option
     if choice == "yes":
         get_pokemon_info(player1_name)
         get_pokemon_info(player2_name)
         input("Press Enter to continue...")
 
-    while player1_hp > 0 and player2_hp > 0:
+    while player1_hp > 0 and player2_hp > 0: # player 1 attacker
         damage_to_player2 = max(1, player1_stats.get('attack', 0) - player2_stats.get('defense', 0))
         player2_hp -= damage_to_player2
         print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
@@ -108,18 +108,18 @@ while True:
             print(f"{player1_name.capitalize()} wins!")
             break
 
-        damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0))
+        damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attacks
         player1_hp -= damage_to_player1
         print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
 
-    if player1_hp <= 0 and player2_hp <= 0:
+    if player1_hp <= 0 and player2_hp <= 0: #p1 and p2 both draw
         print("It's a tie!")
-    elif player1_hp <= 0:
+    elif player1_hp <= 0: # player 2 wins
         print(f"{player2_name.capitalize()} wins!")
-    elif player2_hp <= 0:
+    elif player2_hp <= 0: # player 1 wins
         print(f"{player1_name.capitalize()} wins!")
 
-    play_again = input("Do you want to play again? (yes/no): ").lower()
+    play_again = input("Do you want to play again? (yes/no): ").lower() # option to play again
     if play_again != "yes":
         break
 
