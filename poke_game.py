@@ -69,17 +69,19 @@ while True:  # Main game loop
 
     while player1_hp > 0 and player2_hp > 0:
         # Player 1 attacks Player 2
-        player2_hp -= max(1, player1_stats.get('attack', 0) - player2_stats.get('defense', 0))
-        print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}!")
-
+        damage_to_player2 = max(1, player1_stats.get('attack', 0) - player2_stats.get('defense', 0))
+        player2_hp -= damage_to_player2
+        print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
 
         if player2_hp <= 0: # check if Player 2's Pokémon died
             print(f"{player1_name.capitalize()} wins!")
             break
 
 
-        player1_hp -= max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attacks Player 1
-        print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}!")
+        # Player 2 attacks Player 1
+        damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0))
+        player1_hp -= damage_to_player1
+        print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
 
 
     if player1_hp <= 0 and player2_hp <= 0:  # determine the winner based on remaining HP
