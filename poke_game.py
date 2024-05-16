@@ -1,69 +1,91 @@
-import json
-import requests
 import random
+import requests
+import json
+from random import randint
 
-
-url = 'https://pokeapi.co/api/v2/pokemon/?limit=493&offset=0'
+# Get the list of pokemon from the API
+url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
 response = requests.get(url)
 pokemon_list = response.json()['results']
-print(pokemon_list)
-player1_name = input('Player 1, give me a Pokémon: ')
-player2_name = random.choice(pokemon_list)['name']
 
-print("Player 2 (CPU) has selected:", player2_name.capitalize())
+pokemon_list
 
-player1_stats = {} #empty dictionaries for pokemon stats
-player2_stats = {}
+def get_player_pokemon():
+    pokemon_name = input('Please enter a pokemon: ')
+    global player_pokemon_stats
+    global pokemon_data
+    player_pokemon_stats = {}
+    for pokemon in pokemon_list:
+        if pokemon['name'] == pokemon_name.lower():
+            pokemon_url = pokemon['url']
+            pokemon_data = requests.get(pokemon_url).json()
+            player_pokemon_stats = {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data["stats"]}
+            print("You have chosen:", pokemon_name.capitalize())
+            print("Stats:")
+            for stat in pokemon_data['stats']:
+                print(f"{stat['stat']['name'].capitalize()}: {stat['base_stat']}\n")
+            break
+    else:
+        print("Pokémon not found:", pokemon_name.capitalize())
 
-for pokemon in pokemon_list:
-    if pokemon['name'] == player1_name.lower():
-        player1_url = pokemon['url']
-        player1_data = requests.get(player1_url).json()
-        player1_stats = {stat['stat']['name']: stat['base_stat'] for stat in player1_data['stats']}
-        print("Player 1's Pokémon -", player1_name.capitalize())
-        print("Stats:")
-        for stat, value in player1_stats.items():
-            print(f"{stat.capitalize()}: {value}")
-        break
-else:
-    print("Player 1's Pokémon not found:", player1_name.capitalize())
+def get_random_pokemon():
 
-for pokemon in pokemon_list:
-    if pokemon['name'] == player2_name.lower():
-        player2_url = pokemon['url']
-        player2_data = requests.get(player2_url).json()
-        player2_stats = {stat['stat']['name']: stat['base_stat'] for stat in player2_data['stats']}
-        print("\nPlayer 2's Pokémon -", player2_name.capitalize())
-        print("Stats:")
-        for stat, value in player2_stats.items():
-            print(f"{stat.capitalize()}: {value}")
-        break
-else:
-    print("Player 2's Pokémon not found:", player2_name.capitalize())
-
-player1_stats
-player1_hp = player1_stats['hp'] # health points
-player2_hp = player2_stats['hp']
-
-while player1_hp > 0 and player2_hp > 0: #battle is a loop until there's a winner
-
-    # p1 attacks p2, then p2 attacks p1
-    player2_hp -= max(1, player1_stats['attack'] - player2_stats['defense'])
-    print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}!")
-    # damage = attacker's Attack - defender's Defense stat
-    # if positive, attacker deals at least 1 damage
-    # if negative, the attacker deals 1 damage
-    if player2_hp <= 0:
-        print(f"{player1_name.capitalize()} wins!")
-        break
+    global enemy_pokemon_stats
+    global enemy_pokemon_data
+    enemy_pokemon_stats = {}
+    rng = randint(0, 150)
+    enemy = f"https://pokeapi.co/api/v2/pokemon/{rng}/"
+    enemy_pokemon_data = requests.get(enemy).json()
+    enemy_pokemon_stats = {stat['stat']['name']: stat['base_stat'] for stat in enemy_pokemon_data["stats"]}
+    print("Name:", enemy_pokemon_data["name"].capitalize())
+    print("Stats:")
+    for stat in enemy_pokemon_data['stats']:
+        print(f"{stat['stat']['name'].capitalize()}: {stat['base_stat']}\n")
 
 
-    player1_hp -= max(1, player2_stats['attack'] - player1_stats['defense'])
-    print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}!")
+def attack():
+    player_pokemon = player_pokemon_stats
+    enemy_pokemon = enemy_pokemon_stats
+    while player_pokemon["hp"] > 0 and enemy_pokemon["hp"] > 0:
+        if player_pokemon["speed"] > enemy_pokemon["speed"]:
 
-if player1_hp <= 0 and player2_hp <= 0: # if both players health is zero
-    print("It's a tie!")
-elif player1_hp <= 0: # if p1 has less health
-    print(f"{player2_name.capitalize()} wins!")
-elif player2_hp <= 0: # if p2 has less health
-    print(f"{player1_name.capitalize()} wins!")
+            enemy_pokemon["hp"] -= max(1,player_pokemon["attack"] - enemy_pokemon["defense"])
+            print(f"\n {pokemon_data["name"]} attacked {enemy_pokemon_data["name"]} for {max(1,player_pokemon["attack"] - enemy_pokemon["defense"])} "
+                  f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}")
+
+            if enemy_pokemon["hp"] > 0:
+                player_pokemon["hp"] -= max(1,enemy_pokemon["attack"] - player_pokemon["defense"])
+                print(f"\n {enemy_pokemon_data["name"]} attacked {pokemon_data["name"]} for {max(1,enemy_pokemon["attack"] - player_pokemon["defense"])} "
+                      f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]}")
+
+        elif enemy_pokemon["speed"] > player_pokemon["speed"]:
+
+            player_pokemon["hp"] -= max(1,enemy_pokemon["attack"] - player_pokemon["defense"])
+            print(f"\n {enemy_pokemon_data["name"]} attacked {pokemon_data["name"]} for {max(1,player_pokemon["attack"] - enemy_pokemon["defense"])} "
+                  f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]} \n")
+
+            if player_pokemon["hp"] > 0:
+                enemy_pokemon["hp"] -= max(1,player_pokemon["attack"] - enemy_pokemon["defense"])
+                print(f"\n{player_pokemon["name"]} attacked {enemy_pokemon["name"]} for {max(1,enemy_pokemon["attack"] - player_pokemon["defense"])} "
+                      f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}")
+
+    if enemy_pokemon["hp"] <= 0:
+        print(f"{enemy_pokemon_data["name"]} fainted")
+        print(f"{pokemon_data["name"]} wins")
+        return
+
+    if player_pokemon["hp"] <= 0:
+        print(f"{pokemon_data["name"]} fainted")
+        print(f"{enemy_pokemon_data["name"]} wins!")
+        return
+
+
+
+def pokemon_battle():
+    get_player_pokemon()
+    get_random_pokemon()
+    attack()
+
+
+
+pokemon_battle()
