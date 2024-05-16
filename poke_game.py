@@ -1,6 +1,7 @@
 import json
 import requests
 import random
+import time
 
 url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
 response = requests.get(url)
@@ -107,6 +108,8 @@ while True:
         if player2_hp <= 0:
             print(f"{player1_name.capitalize()} wins!")
             break
+
+        time.sleep(2)  # Add a 2-second delay between attacks
 
         damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attacks
         player1_hp -= damage_to_player1
