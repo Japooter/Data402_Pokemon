@@ -2,10 +2,11 @@ import json
 import requests
 import random
 
-url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
+
+url = 'https://pokeapi.co/api/v2/pokemon/?limit=493&offset=0'
 response = requests.get(url)
 pokemon_list = response.json()['results']
-
+print(pokemon_list)
 player1_name = input('Player 1, give me a Pokémon: ')
 player2_name = random.choice(pokemon_list)['name']
 
@@ -40,7 +41,7 @@ for pokemon in pokemon_list:
 else:
     print("Player 2's Pokémon not found:", player2_name.capitalize())
 
-
+player1_stats
 player1_hp = player1_stats['hp'] # health points
 player2_hp = player2_stats['hp']
 
