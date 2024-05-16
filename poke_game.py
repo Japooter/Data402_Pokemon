@@ -39,6 +39,7 @@ def get_pokemon_info(pokemon_name): # get full stats for pokemon in fight
     else:
         print("Pokemon not found.")
 
+
 def is_valid_pokemon(pokemon_name): # check that user input is an actual pokemon in the list
     return any(pokemon_name.lower() == pokemon['name'] for pokemon in pokemon_list)
 
@@ -109,7 +110,7 @@ while True:
             print(f"{player1_name.capitalize()} wins!")
             break
 
-        time.sleep(2)  # Add a 2-second delay between attacks
+        time.sleep(1)  # Add a 1 second delay between attacks
 
         damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attacks
         player1_hp -= damage_to_player1
