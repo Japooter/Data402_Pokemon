@@ -6,6 +6,7 @@ url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
 response = requests.get(url)
 pokemon_list = response.json()['results']
 
+
 def get_pokemon_info(pokemon_name):
     url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}'
     response = requests.get(url)
@@ -17,22 +18,23 @@ def get_pokemon_info(pokemon_name):
         print(f"ID: {pokemon_data['id']}")
         print(f"Height: {pokemon_data['height']}")
         print(f"Weight: {pokemon_data['weight']}")
+
         print("Abilities:")
         for ability in pokemon_data['abilities']:
-            print(f"- {ability['ability']['name'].capitalize()}")
+            print(f" - {ability['ability']['name'].capitalize()}")
+
         print("Moves:")
-        for move in pokemon_data['moves']:
-            print(f"- {move['move']['name'].capitalize()}")
+        move_list = [move['move']['name'].capitalize() for move in pokemon_data['moves']]
+        print("\n".join([" - " + move for move in move_list]))
+
         print("Types:")
-        for type_info in pokemon_data['types']:
-            print(f"- {type_info['type']['name'].capitalize()}")
+        type_list = [type_info['type']['name'].capitalize() for type_info in pokemon_data['types']]
+        print(", ".join(type_list))
+
         print("Stats:")
         for stat in pokemon_data['stats']:
-            print(f"- {stat['stat']['name'].capitalize()}: {stat['base_stat']}")
-        print("Sprites:")
-        for sprite_type, sprite_url in pokemon_data['sprites'].items():
-            if sprite_url:
-                print(f"- {sprite_type.capitalize()}: {sprite_url}")
+            print(f" - {stat['stat']['name'].capitalize()}: {stat['base_stat']}")
+
     else:
         print("Pokemon not found.")
 
@@ -94,6 +96,7 @@ while True:
     choice = input("Do you want to view stats of your Pokémon? (yes/no): ").lower()
     if choice == "yes":
         get_pokemon_info(player1_name)
+        get_pokemon_info(player2_name)
         input("Press Enter to continue...")
 
     while player1_hp > 0 and player2_hp > 0:
