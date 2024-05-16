@@ -43,31 +43,47 @@ def get_random_pokemon():
         print(f"{stat['stat']['name'].capitalize()}: {stat['base_stat']}\n")
 
 
+
 def attack():
+    pokemon_max_hp = player_pokemon_stats["hp"]
+    enemy_max_hp = enemy_pokemon_stats["hp"]
     player_pokemon = player_pokemon_stats
     enemy_pokemon = enemy_pokemon_stats
+    bars = 20
+    remaining_health_symbol = chr(9608)
     while player_pokemon["hp"] > 0 and enemy_pokemon["hp"] > 0:
         if player_pokemon["speed"] > enemy_pokemon["speed"]:
-
             enemy_pokemon["hp"] -= max(1,player_pokemon["attack"] - enemy_pokemon["defense"])
+            enemy_remaining_health = round(enemy_pokemon["hp"] / enemy_max_hp * bars)
+            enemy_lost_health = bars - enemy_remaining_health
             print(f"\n {pokemon_data["name"]} attacked {enemy_pokemon_data["name"]} for {max(1,player_pokemon["attack"] - enemy_pokemon["defense"])} "
-                  f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}")
+                  f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}/{enemy_max_hp}"
+                  f"\n {enemy_remaining_health*remaining_health_symbol}{enemy_lost_health*"_"}")
 
             if enemy_pokemon["hp"] > 0:
                 player_pokemon["hp"] -= max(1,enemy_pokemon["attack"] - player_pokemon["defense"])
+                player_remaining_health = round(player_pokemon["hp"] / pokemon_max_hp * bars)
+                player_lost_health = bars - player_remaining_health
                 print(f"\n {enemy_pokemon_data["name"]} attacked {pokemon_data["name"]} for {max(1,enemy_pokemon["attack"] - player_pokemon["defense"])} "
-                      f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]}")
+                      f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]}/{pokemon_max_hp}"
+                      f"\n {player_remaining_health*remaining_health_symbol}{ player_lost_health*"_"}")
 
         elif enemy_pokemon["speed"] > player_pokemon["speed"]:
 
-            player_pokemon["hp"] -= max(1,enemy_pokemon["attack"] - player_pokemon["defense"])
-            print(f"\n {enemy_pokemon_data["name"]} attacked {pokemon_data["name"]} for {max(1,player_pokemon["attack"] - enemy_pokemon["defense"])} "
-                  f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]} \n")
+            player_pokemon["hp"] -= max(1, enemy_pokemon["attack"] - player_pokemon["defense"])
+            player_remaining_health = round(player_pokemon["hp"] / pokemon_max_hp * bars)
+            player_lost_health = bars - player_remaining_health
+            print(f"\n {enemy_pokemon_data["name"]} attacked {pokemon_data["name"]} for {max(1, enemy_pokemon["attack"] - player_pokemon["defense"])} "
+                  f"\n  {pokemon_data["name"]} hp at {player_pokemon["hp"]}/{pokemon_max_hp}"
+                   f"\n {player_remaining_health*remaining_health_symbol}{ player_lost_health*"_"}")
 
             if player_pokemon["hp"] > 0:
-                enemy_pokemon["hp"] -= max(1,player_pokemon["attack"] - enemy_pokemon["defense"])
-                print(f"\n{player_pokemon["name"]} attacked {enemy_pokemon["name"]} for {max(1,enemy_pokemon["attack"] - player_pokemon["defense"])} "
-                      f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}")
+                enemy_remaining_health = round(enemy_pokemon["hp"] / enemy_max_hp * bars)
+                enemy_lost_health = bars - enemy_remaining_health
+                enemy_pokemon["hp"] -= max(1, player_pokemon["attack"] - enemy_pokemon["defense"])
+                print(f"\n {pokemon_data["name"]} attacked {enemy_pokemon_data["name"]} for {max(1, player_pokemon["attack"] - enemy_pokemon["defense"])} "
+                      f"\n  {enemy_pokemon_data["name"]} hp at {enemy_pokemon["hp"]}/{enemy_max_hp}"
+                       f"\n {enemy_remaining_health*remaining_health_symbol}{enemy_lost_health*"_"}")
 
     if enemy_pokemon["hp"] <= 0:
         print(f"{enemy_pokemon_data["name"]} fainted")
@@ -85,6 +101,7 @@ def pokemon_battle():
     get_player_pokemon()
     get_random_pokemon()
     attack()
+
 
 
 
