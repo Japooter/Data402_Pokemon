@@ -2,14 +2,16 @@ import json
 import requests
 import random
 import time
+from prettytable import PrettyTable
 
-url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
+
+url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0' # URL to fetch Pokemon data
 response = requests.get(url)
-pokemon_list = response.json()['results']
+pokemon_list = response.json()['results'] # store data in variable
 
 
-def get_pokemon_info(pokemon_name): # get full stats for pokemon in fight
-    url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}'
+def get_pokemon_info(pokemon_name): # function to get full stats for a Pokémon
+    url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}' # handle case sensitivity
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -25,25 +27,31 @@ def get_pokemon_info(pokemon_name): # get full stats for pokemon in fight
             print(f" - {ability['ability']['name'].capitalize()}")
 
         print("Moves:")
-        move_list = [move['move']['name'].capitalize() for move in pokemon_data['moves']]
+        move_list = [move['move']['name'].capitalize() for move in pokemon_data['moves']] # create move list
         print("\n".join([" - " + move for move in move_list]))
 
         print("Types:")
         type_list = [type_info['type']['name'].capitalize() for type_info in pokemon_data['types']]
         print(", ".join(type_list))
 
-        print("Stats:")
-        for stat in pokemon_data['stats']:
-            print(f" - {stat['stat']['name'].capitalize()}: {stat['base_stat']}")
-
     else:
         print("Pokemon not found.")
 
 
-def is_valid_pokemon(pokemon_name): # check that user input is an actual pokemon in the list
+def is_valid_pokemon(pokemon_name): # function to check if the entered Pokémon name is valid
     return any(pokemon_name.lower() == pokemon['name'] for pokemon in pokemon_list)
 
-while True:
+
+def display_stats(player_number, pokemon_name, pokemon_data): # function to display stats of a Pokémon
+    print(f"Player {player_number}'s Pokémon - {pokemon_name.capitalize()}")
+    print("Stats:")
+    table = PrettyTable(["Stat", "Value"]) # for better formatted table
+    for stat in pokemon_data['stats']:
+        table.add_row([stat['stat']['name'].capitalize(), stat['base_stat']])
+    print(table)
+
+
+while True: # main game loop
     while True:
         player1_name = input('Player 1, give me a Pokémon: ').capitalize()
         if is_valid_pokemon(player1_name):
@@ -51,72 +59,60 @@ while True:
         else:
             print("Invalid Pokémon name. Please try again.")
 
-    player2_name = random.choice(pokemon_list)['name']
+    player2_name = random.choice(pokemon_list)['name'] # random selection for CPU character
 
-    player1_stats = {} # empty dictionary for pokemon stats
+    player1_stats = {} # empty dictionary to store player 1 stats
     player2_stats = {}
 
-    for pokemon in pokemon_list: # fill up empty dictionary with selected pokemon's stats
+
+    for pokemon in pokemon_list:     # fetch and display stats for Player 1's Pokémon
         if pokemon['name'] == player1_name.lower():
             player1_url = pokemon['url']
             player1_data = requests.get(player1_url).json()
-            player1_stats = {stat['stat']['name']: stat['base_stat'] for stat in player1_data['stats']}
-
-            player1_pokemon_name = player1_data['name']
-            player1_pokemon_types = [t['type']['name'] for t in player1_data['types']]
-            print("Player 1's Pokémon -", player1_name.capitalize())
-            print("Stats:")
-            for stat, value in player1_stats.items():
-                print(f"{stat.capitalize()}: {value}")
-            print(f"Name: {player1_pokemon_name.capitalize()}")
-            print("Types:", ", ".join(player1_pokemon_types))
+            player1_stats = {stat['stat']['name']: stat['base_stat'] for stat in player1_data['stats']} # add to dict
+            display_stats(1, player1_name, player1_data)
             break
     else:
         print("Player 1's Pokémon not found:", player1_name.capitalize())
+
 
     for pokemon in pokemon_list:
         if pokemon['name'] == player2_name.lower():
             player2_url = pokemon['url']
             player2_data = requests.get(player2_url).json()
             player2_stats = {stat['stat']['name']: stat['base_stat'] for stat in player2_data['stats']}
-
-            player2_pokemon_name = player2_data['name']
-            player2_pokemon_types = [t['type']['name'] for t in player2_data['types']]
-            print("\nPlayer 2's Pokémon -", player2_name.capitalize())
-            print("Stats:")
-            for stat, value in player2_stats.items():
-                print(f"{stat.capitalize()}: {value}")
-            print(f"Name: {player2_pokemon_name.capitalize()}")
-            print("Types:", ", ".join(player2_pokemon_types))
+            display_stats(2, player2_name, player2_data)
             break
     else:
         print("Player 2's Pokémon not found:", player2_name.capitalize())
 
-    player1_hp = player1_stats.get('hp', 0) #health points
+    player1_hp = player1_stats.get('hp', 0)
     player2_hp = player2_stats.get('hp', 0)
 
-    choice = input("Do you want to view the full stats of your Pokémon? (yes/no): ").lower() # view full stats option
+    choice = input("Do you want to view the full stats of your Pokémon? (yes/no): ").lower()
     if choice == "yes":
         get_pokemon_info(player1_name)
         get_pokemon_info(player2_name)
         input("Press Enter to continue...")
 
-    while player1_hp > 0 and player2_hp > 0: # player 1 attacker
+    while player1_hp > 0 and player2_hp > 0: # player 1 attack
         damage_to_player2 = max(1, player1_stats.get('attack', 0) - player2_stats.get('defense', 0))
         player2_hp -= damage_to_player2
-        print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
+        print(
+            f"{player1_name.capitalize()} attacks {player2_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
 
         if player2_hp <= 0:
             print(f"{player1_name.capitalize()} wins!")
             break
 
-        time.sleep(1)  # Add a 1 second delay between attacks
+        time.sleep(1) # time delay between attack rounds 
 
-        damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attacks
+        damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attack
         player1_hp -= damage_to_player1
-        print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
+        print(
+            f"{player2_name.capitalize()} attacks {player1_name.capitalize()}! Remaining HP for {player1_name.capitalize()}: {player1_hp}, Remaining HP for {player2_name.capitalize()}: {player2_hp}")
 
-    if player1_hp <= 0 and player2_hp <= 0: #p1 and p2 both draw
+    if player1_hp <= 0 and player2_hp <= 0: # draw
         print("It's a tie!")
     elif player1_hp <= 0: # player 2 wins
         print(f"{player2_name.capitalize()} wins!")
