@@ -66,10 +66,44 @@
 import json
 import requests
 import random
+import time
 
 url = 'https://pokeapi.co/api/v2/pokemon/?limit=150&offset=0'
 response = requests.get(url)
 pokemon_list = response.json()['results']
+
+def get_pokemon_info(pokemon_name): # get full stats for pokemon in fight
+    url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}'
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        pokemon_data = response.json()
+        print("Full Stats")
+        print(f"Name: {pokemon_data['name'].capitalize()}")
+        print(f"ID: {pokemon_data['id']}")
+        print(f"Height: {pokemon_data['height']}")
+        print(f"Weight: {pokemon_data['weight']}")
+
+        print("Abilities:")
+        for ability in pokemon_data['abilities']:
+            print(f" - {ability['ability']['name'].capitalize()}")
+
+        print("Moves:")
+        move_list = [move['move']['name'].capitalize() for move in pokemon_data['moves']]
+        print("\n".join([" - " + move for move in move_list]))
+
+        print("Types:")
+        type_list = [type_info['type']['name'].capitalize() for type_info in pokemon_data['types']]
+        print(", ".join(type_list))
+
+        print("Stats:")
+        for stat in pokemon_data['stats']:
+            print(f" - {stat['stat']['name'].capitalize()}: {stat['base_stat']}")
+
+    else:
+        print("Pokemon not found.")
+
+
 choice_of_players = input("How many players? (1/2) \n")
 if choice_of_players == "1":
 
@@ -142,20 +176,43 @@ while p2_check == False:
 player1_hp = player1_stats['hp'] # health points
 player2_hp = player2_stats['hp']
 
+player1_specialuses = 2
+player2_specialuses = 2
+
+full_stat_p1 = input("Player 1, do you want to view the full stats of your Pokémon? (yes/no): ").lower()
+if full_stat_p1 == "yes":
+    get_pokemon_info(player1_name)
+    input("Press Enter to continue...")
+
+if choice_of_players == "2":
+    full_stat_p2 = input("Player 2, do you want to view the full stats of your Pokémon? (yes/no): ").lower()
+    if full_stat_p2 == "yes":
+        get_pokemon_info(player2_name)
+        input("Press Enter to continue...")
+
 while player1_hp > 0 and player2_hp > 0: #battle is a loop until there's a winner
+    # print(player1_stats)
+    # print(player2_stats)
     p1_choice = input("Choose an action! \n"
                       "Attack \n"
                       "Special Attack \n")
     # p1 attacks p2, then p2 attacks p1
-    p1_choice = p1_choice.capitalize()
+    #p1_choice = p1_choice.capitalize()
     if p1_choice == "Attack":
         player2_hp -= max(1, player1_stats['attack'] - player2_stats['defense'])
         print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}!")
         print(f"{player2_name.capitalize()}\'s HP: {player2_hp}")
-    elif p1_choice == "Special Attack":
-        player2_hp -= max(1, player1_stats['special-attack'] - player2_stats['special-defense'])
-        print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}!")
-        print(f"{player2_name.capitalize()}\'s HP: {player2_hp}")
+    elif p1_choice == ("Special Attack"):
+        if player1_specialuses > 0:
+            player2_hp -= max(1, player1_stats['special-attack'] - player2_stats['special-defense'])
+            print(f"{player1_name.capitalize()} uses their special attack on {player2_name.capitalize()}!")
+            print(f"{player2_name.capitalize()}\'s HP: {player2_hp}")
+            player1_specialuses -= 1
+        else:
+            print("Out of special attack uses! Resorting to regular attack!")
+            player2_hp -= max(1, player1_stats['attack'] - player2_stats['defense'])
+            print(f"{player1_name.capitalize()} attacks {player2_name.capitalize()}!")
+            print(f"{player2_name.capitalize()}\'s HP: {player2_hp}")
     # damage = attacker's Attack - defender's Defense stat
     # if positive, attacker deals at least 1 damage
     # if negative, the attacker deals 1 damage
@@ -166,13 +223,24 @@ while player1_hp > 0 and player2_hp > 0: #battle is a loop until there's a winne
         p2_choice = input("Choose an action! \n"
                          "Attack \n"
                          "Special Attack \n")
-        p2_choice = p2_choice.capitalize()
+        #p2_choice = p2_choice.capitalize()
     elif choice_of_players == "1":
         p2_choice = random.choice(["Attack", "Special Attack"])
     if p2_choice == "Attack":
         player1_hp -= max(1, player2_stats['attack'] - player1_stats['defense'])
         print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}!")
         print(f"{player1_name.capitalize()}\'s HP: {player1_hp}")
+    elif p2_choice == ("Special Attack"):
+        if player2_specialuses > 0:
+            player1_hp -= max(1, player2_stats['special-attack'] - player1_stats['special-defense'])
+            print(f"{player2_name.capitalize()} uses their special attack on {player1_name.capitalize()}!")
+            print(f"{player1_name.capitalize()}\'s HP: {player1_hp}")
+            player2_specialuses -= 1
+        else:
+            print("Out of special attack uses! Resorting to regular attack!")
+            player1_hp -= max(1, player2_stats['attack'] - player1_stats['defense'])
+            print(f"{player2_name.capitalize()} attacks {player1_name.capitalize()}!")
+            print(f"{player1_name.capitalize()}\'s HP: {player1_hp}")
 
 if player1_hp <= 0 and player2_hp <= 0: # if both players health is zero
     print("It's a tie!")
