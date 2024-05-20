@@ -105,7 +105,7 @@ while True: # main game loop
             print(f"{player1_name.capitalize()} wins!")
             break
 
-        time.sleep(1) # time delay between attack rounds 
+        time.sleep(1) # time delay between attack rounds
 
         damage_to_player1 = max(1, player2_stats.get('attack', 0) - player1_stats.get('defense', 0)) # player 2 attack
         player1_hp -= damage_to_player1
